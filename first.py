@@ -25,7 +25,7 @@ def create_account(data, used_account_numbers):
     account_number = generate_account_number(used_account_numbers)
     transfers=[] #for transfers only
     deposits=[initial_balance] #for deposits only
-    transactions=['+'.join(initial_balance)] #for evrything
+    transactions=['+'+str(initial_balance)] #for evrything
     def get_loan_percentage():
         min_p=3.0
         max_p=15.0
@@ -65,7 +65,7 @@ def deposit_money(data):
                 print(f"Deposited {amount} GEL successfully!")
                 print(f"New Balance: {account['balance']} GEL")
                 account["deposits"].append(amount)
-                account["transactions"].append('+'.join(amount))
+                account["transactions"].append('+'+str(amount))
                 return
 
 def check_balance(data):
@@ -123,9 +123,9 @@ def transfer_money(data):
     print(f"Transfer of {amount} GEL from {from_account_number} to {to_account_number} successful.")
     print(f"Your new balance: {from_account['balance']} GEL")
     from_account["transfers"].append(amount)
-    from_account["transactions"].append('-'.join(amount))
+    from_account["transactions"].append('-'+ str(amount))
     to_account["deposits"].append(amount)
-    to_account["transactions"].append('+'.join(amount))
+    to_account["transactions"].append('+'+ str(amount))
 
 def get_account_details(data):
     while True:
@@ -175,6 +175,7 @@ def print_history(data):
     elif choice==3:
          for deposit in account_history_det["deposits"]:
             print(deposit,'\n')
+            
 def compute_loan(data):
     while True:
         account_loan = input("Enter account number to display details: ")
@@ -192,11 +193,11 @@ def compute_loan(data):
         if loan_num.isdigit():
             loan_num=int(loan_num)
             break
-    print("Your annual loan percentage is:", loan_num*account_loan_det["loan_per"]/100)
+    print("Your annual loan percentage is:", loan_num*account_loan_det["loan_percentage"]/100)
     yesno=input("Would you like to take the loan? (yes/no)")
     if yesno=="yes":
         account_loan_det["balance"]+=loan_num
-        account_loan_det["transactions"].append("+".join(loan_num))
+        account_loan_det["transactions"].append("+"+ str(loan_num))
         account_loan_det["deposits"].append(loan_num)
     elif yesno=="no":
         print("Loan has been cancelled.")    
