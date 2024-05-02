@@ -23,7 +23,10 @@ def create_account(data, used_account_numbers):
             print("Invalid input. Please enter a valid number for the initial balance.")
 
     account_number = generate_account_number(used_account_numbers)
-    account = {"name": name, "balance": initial_balance, "account_number": account_number}
+    transfers=[] #for transfers only
+    deposits=[initial_balance] #for deposits only
+    transactions=['+'.join(initial_balance)] #for evrything
+    account = {"name": name, "balance": initial_balance, "account_number": account_number,"transfers":transfers,"deposits":deposits,"transactions":transactions}
     data.append(account)
     print("Account created successfully!")
     print(f"Account Number: {account['account_number']}")
@@ -56,6 +59,8 @@ def deposit_money(data):
                 account['balance'] += amount
                 print(f"Deposited {amount} GEL successfully!")
                 print(f"New Balance: {account['balance']} GEL")
+                account["deposits"].append(amount)
+                account["transactions"].append('+'.join(amount))
                 return
 
 def check_balance(data):
@@ -109,11 +114,65 @@ def transfer_money(data):
         
     from_account['balance'] -= amount
     to_account['balance'] += amount
-
+    
     print(f"Transfer of {amount} GEL from {from_account_number} to {to_account_number} successful.")
     print(f"Your new balance: {from_account['balance']} GEL")
+    from_account["transfers"].append(amount)
+    from_account["transactions"].append('-'.join(amount))
+    to_account["deposits"].append(amount)
+    to_account["transactions"].append('+'.join(amount))
+
+def get_account_details(data):
+    while True:
+        display_account = input("Enter account number to display details: ")
+        display_account_det = None
+        for account in data:
+            if account["account_number"] == display_account:
+                display_account_det = account
+                break
+        if display_account_det is None:
+            print("Account number not found. Please enter a valid account number.")
+        else:
+            break
+    print("Here are your details:")
+    print("Name:",display_account_det["name"])
+    print("Current balance:",display_account_det["balance"])
+    print("Account number:",display_account_det["account_number"])
 
 
+def print_history(data):
+    while True:
+        account_history = input("Enter account number to display details: ")
+        account_history_det = None
+        for account in data:
+            if account["account_number"] == account_history:
+                account_history_det = account
+                break
+        if account_history_det is None:
+            print("Account number not found. Please enter a valid account number.")
+        else:
+            break
+    print("What type of history do you want to see?")
+    print("1.Every transaction")
+    print("2.Tranfers only")
+    print("3.Deposits only")
+    while True:
+        choice=input("Enter your choice: ")
+        if choice.isdigit():
+            choice=int(choice)
+            break
+    if choice==1:
+        for transaction in account_history_det["transactions"]:
+            print(transaction,'\n')
+    elif choice==2:
+         for tranfer in account_history_det["transfers"]:
+            print(tranfer,'\n')
+    elif choice==3:
+         for deposit in account_history_det["deposits"]:
+            print(deposit,'\n')
+    
+        
+        
 def menu():
     data = []
     used_account_numbers = set()
@@ -124,9 +183,10 @@ def menu():
         print("2. Deposit money")
         print("3. Balance")
         print("4. Transfer money")
-        print("5. Other options (placeholder)")
-        print("6. Other options (placeholder)")
-        print("7. Exit")
+        print("5. Get account details")
+        print("6. Get account history")
+        print("7. Compute loan")
+        print("8. Exit")
       
         choice = input("Enter your choice: ")
 
@@ -139,10 +199,12 @@ def menu():
         elif choice == "4":
             transfer_money(data)
         elif choice == "5":
-            pass
+            get_account_details(data)
         elif choice == "6":
+            print_history(data)
+        elif choice=="7":
             pass
-        elif choice == "7":
+        elif choice == "8":
             print("Exiting program.")
             break
         else:
