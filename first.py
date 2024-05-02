@@ -26,7 +26,12 @@ def create_account(data, used_account_numbers):
     transfers=[] #for transfers only
     deposits=[initial_balance] #for deposits only
     transactions=['+'.join(initial_balance)] #for evrything
-    account = {"name": name, "balance": initial_balance, "account_number": account_number,"transfers":transfers,"deposits":deposits,"transactions":transactions}
+    def get_loan_percentage():
+        min_p=3.0
+        max_p=15.0
+        return random.uniform(min_p,max_p)
+    loan_percentage=get_loan_percentage()
+    account = {"name": name, "balance": initial_balance, "account_number": account_number,"transfers":transfers,"deposits":deposits,"transactions":transactions, "loan_percentage":loan_percentage}
     data.append(account)
     print("Account created successfully!")
     print(f"Account Number: {account['account_number']}")
@@ -170,7 +175,31 @@ def print_history(data):
     elif choice==3:
          for deposit in account_history_det["deposits"]:
             print(deposit,'\n')
-    
+def compute_loan(data):
+    while True:
+        account_loan = input("Enter account number to display details: ")
+        account_loan_det = None
+        for account in data:
+            if account["account_number"] == account_loan:
+                account_loan_det = account
+                break
+        if account_loan_det is None:
+            print("Account number not found. Please enter a valid account number.")
+        else:
+            break
+    while True:
+        loan_num=input("Enter how much would you like to loan: ")
+        if loan_num.isdigit():
+            loan_num=int(loan_num)
+            break
+    print("Your annual loan percentage is:", loan_num*account_loan_det["loan_per"]/100)
+    yesno=input("Would you like to take the loan? (yes/no)")
+    if yesno=="yes":
+        account_loan_det["balance"]+=loan_num
+        account_loan_det["transactions"].append("+".join(loan_num))
+        account_loan_det["deposits"].append(loan_num)
+    elif yesno=="no":
+        print("Loan has been cancelled.")    
         
         
 def menu():
@@ -203,7 +232,7 @@ def menu():
         elif choice == "6":
             print_history(data)
         elif choice=="7":
-            pass
+            compute_loan(data)
         elif choice == "8":
             print("Exiting program.")
             break
