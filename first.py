@@ -1,5 +1,17 @@
 import random
 
+import os
+
+def append_to_transactions_file(account, amount):
+    file_path = 'transactions.txt'
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as f:
+            pass
+    
+    with open(file_path, 'a') as f:
+        f.write(f"({account['name']}, {account['account_number']}, {amount})\n")
+
+
 def generate_account_number(used_account_numbers):
     prefix = "TB"
     while True:
@@ -35,6 +47,7 @@ def create_account(data, used_account_numbers):
     data.append(account)
     print("Account created successfully!")
     print(f"Account Number: {account['account_number']}")
+    append_to_transactions_file(account, initial_balance)
     return account
 
 def deposit_money(data):
@@ -66,6 +79,7 @@ def deposit_money(data):
                 print(f"New Balance: {account['balance']} GEL")
                 account["deposits"].append(amount)
                 account["transactions"].append('+'+str(amount))
+                append_to_transactions_file(account, amount)
                 return
 
 def check_balance(data):
@@ -126,6 +140,8 @@ def transfer_money(data):
     from_account["transactions"].append('-'+ str(amount))
     to_account["deposits"].append(amount)
     to_account["transactions"].append('+'+ str(amount))
+    append_to_transactions_file(from_account, -amount)
+    append_to_transactions_file(to_account, amount)
 
 def get_account_details(data):
     while True:
@@ -199,6 +215,7 @@ def compute_loan(data):
         account_loan_det["balance"]+=loan_num
         account_loan_det["transactions"].append("+"+ str(loan_num))
         account_loan_det["deposits"].append(loan_num)
+        append_to_transactions_file(account_loan, loan_num)
     elif yesno=="no":
         print("Loan has been cancelled.")    
         
