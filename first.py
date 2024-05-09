@@ -2,6 +2,7 @@ import random
 import os
 import time 
 import csv
+from datetime import datetime
 
 def append_to_transactions_file(account, amount):
     file_path = 'transactions.txt'
@@ -16,6 +17,12 @@ def generate_unique_user_id():
     timestamp=str(int(time.time()*1000))
     random_number=str(random.randint(1000,9999))
     return timestamp + random_number
+
+def save_transaction(transaction_amount):
+    transaction_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    with open('transactions.csv', mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([transaction_time, transaction_amount])
     
 def generate_account_number(used_account_numbers):
     prefix = "TB"
