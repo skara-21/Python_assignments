@@ -4,26 +4,27 @@ import time
 import csv
 import datetime
 
-def append_to_transactions_file(account, amount):
+def append_to_transactions_file(account, amount, transaction_type):
     file_path = 'transactions.txt'
     if not os.path.exists(file_path):
         with open(file_path, 'w') as f:
             pass
     
     with open(file_path, 'a') as f:
-        f.write(f"({account['name']},{account['surname']}, {account['account_number']}, {amount})\n")
+        f.write(f"({account['name']}, {account['surname']}, {account['account_number']}, {amount})\n")
+    save_transaction(account, amount, transaction_type)
 
 def generate_unique_user_id():
     timestamp=str(int(time.time()*1000))
     random_number=str(random.randint(1000,9999))
     return timestamp + random_number
 
-def save_transaction(transaction_amount):
-    transaction_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+def save_transaction(account, amount, transaction_type):
+    transaction_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     with open('transactions.csv', mode='a', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow([transaction_time, transaction_amount])
-    
+        writer.writerow([transaction_time, account['name'], account['surname'], account['account_number'], amount, transaction_type])
+
 def generate_account_number(used_account_numbers):
     prefix = "TB"
     while True:
@@ -70,7 +71,7 @@ def create_account(data, used_account_numbers):
     data.append(account)
     print("Account created successfully!")
     print(f"Account Number: {account['account_number']}")
-    append_to_transactions_file(account, initial_balance)
+    append_to_transactions_file(account, initial_balance, "Initial Deposit")
     return account
 
 def deposit_money(data):
@@ -102,7 +103,7 @@ def deposit_money(data):
                 print(f"New Balance: {account['balance']} GEL")
                 account["deposits"].append(amount)
                 account["transactions"].append('+'+str(amount))
-                append_to_transactions_file(account, amount)
+                append_to_transactions_file(account, amount,"Deposit")
                 return
 
 def check_balance(data):
@@ -163,8 +164,8 @@ def transfer_money(data):
     from_account["transactions"].append('-'+ str(amount))
     to_account["deposits"].append(amount)
     to_account["transactions"].append('+'+ str(amount))
-    append_to_transactions_file(from_account, -amount)
-    append_to_transactions_file(to_account, amount)
+    append_to_transactions_file(from_account, -amount, "Transfer Out")
+    append_to_transactions_file(to_account, amount, "Transfer In")
 
 def get_account_details(data):
     while True:
@@ -233,22 +234,27 @@ def compute_loan(data):
             loan_num=int(loan_num)
             break
     print("Your annual loan percentage is:", round(loan_num*account_loan_det["loan_percentage"]/100,2))
-    yesno=input("Would you like to take the loan? (yes/no) ")
-    if yesno=="yes":
-        while True:
-            print("how many years would you like to spread your loan across? (min: 1 year) ")
-            duration=input("")
-            if duration.isdigit():
-                duration=int(duration)
-                break
-        generate_loan_file(loan_num,duration, account_loan_det["loan_percentage"])
-        account_loan_det["balance"]+=loan_num
-        account_loan_det["transactions"].append("+"+ str(loan_num))
-        account_loan_det["deposits"].append(loan_num)
-        append_to_transactions_file(account_loan, loan_num)
-        
-    elif yesno=="no":
-        print("Loan has been cancelled.")    
+    while True:
+        yesno=input("Would you like to take the loan? (yes/no) ")
+        if yesno=="yes":
+            while True:
+                print("how many years would you like to spread your loan across? (min: 1 year) ")
+                duration=input("")
+                if duration.isdigit():
+                    duration=int(duration)
+                    break
+            generate_loan_file(loan_num,duration, account_loan_det["loan_percentage"])
+            account_loan_det["balance"]+=loan_num
+            account_loan_det["transactions"].append("+"+ str(loan_num))
+            account_loan_det["deposits"].append(loan_num)
+            append_to_transactions_file(account_loan_det, loan_num, "Loan")
+            print("Loan has been granted.")
+            break
+        elif yesno=="no":
+            print("Loan has been cancelled.")    
+            break
+        else: 
+            print("Invalid input. Please enter 'yes' or 'no'.")
         
     
 def generate_payment_plan(loan_num,loan_percentage,duration,monthly_payment):
