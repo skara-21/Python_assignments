@@ -1,6 +1,7 @@
 import random
-
 import os
+import time 
+import csv
 
 def append_to_transactions_file(account, amount):
     file_path = 'transactions.txt'
@@ -9,9 +10,13 @@ def append_to_transactions_file(account, amount):
             pass
     
     with open(file_path, 'a') as f:
-        f.write(f"({account['name']}, {account['account_number']}, {amount})\n")
+        f.write(f"({account['name']},{account['surname']}, {account['account_number']}, {amount})\n")
 
-
+def generate_unique_user_id():
+    timestamp=str(int(time.time()*1000))
+    random_number=str(random.randint(1000,9999))
+    return timestamp + random_number
+    
 def generate_account_number(used_account_numbers):
     prefix = "TB"
     while True:
@@ -23,6 +28,7 @@ def generate_account_number(used_account_numbers):
 
 def create_account(data, used_account_numbers):
     name = input("Enter your name: ")
+    surname=input("Enter your surname: ")
     while True:
         initial_balance_input = input("Enter your initial balance (<= 100 GEL): ")
         if initial_balance_input.isdigit():
@@ -34,6 +40,15 @@ def create_account(data, used_account_numbers):
         else:
             print("Invalid input. Please enter a valid number for the initial balance.")
 
+    with open('users.csv', mode='a', newline="") as file:
+        writer= csv.DictWriter(file, fieldnames=["USER_ID", "Name", "Surname", "Initial balance"]
+        writer.writerow({
+            "USER_ID": user_id,
+            "Name": name,
+            "Surname": surname,
+            "Initial balance": initial_balance
+        })
+                               
     account_number = generate_account_number(used_account_numbers)
     transfers=[] #for transfers only
     deposits=[initial_balance] #for deposits only
@@ -43,7 +58,7 @@ def create_account(data, used_account_numbers):
         max_p=15.0
         return random.uniform(min_p,max_p)
     loan_percentage=get_loan_percentage()
-    account = {"name": name, "balance": initial_balance, "account_number": account_number,"transfers":transfers,"deposits":deposits,"transactions":transactions, "loan_percentage":loan_percentage}
+    account = {"name": name, "surname": surname, "balance": initial_balance, "account_number": account_number,"transfers":transfers,"deposits":deposits,"transactions":transactions, "loan_percentage":loan_percentage}
     data.append(account)
     print("Account created successfully!")
     print(f"Account Number: {account['account_number']}")
