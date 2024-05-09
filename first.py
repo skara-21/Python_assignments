@@ -27,6 +27,7 @@ def generate_account_number(used_account_numbers):
             return new_account_number
 
 def create_account(data, used_account_numbers):
+    user_id=generate_unique_user_id()
     name = input("Enter your name: ")
     surname=input("Enter your surname: ")
     while True:
