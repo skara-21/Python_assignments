@@ -41,7 +41,7 @@ def create_account(data, used_account_numbers):
             print("Invalid input. Please enter a valid number for the initial balance.")
 
     with open('users.csv', mode='a', newline="") as file:
-        writer= csv.DictWriter(file, fieldnames=["USER_ID", "Name", "Surname", "Initial balance"]
+        writer= csv.DictWriter(file, fieldnames=["USER_ID", "Name", "Surname", "Initial balance"])
         writer.writerow({
             "USER_ID": user_id,
             "Name": name,
