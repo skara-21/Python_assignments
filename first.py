@@ -2,7 +2,7 @@ import random
 import os
 import time 
 import csv
-from datetime import datetime
+import datetime
 
 def append_to_transactions_file(account, amount):
     file_path = 'transactions.txt'
@@ -217,7 +217,7 @@ def print_history(data):
             
 def compute_loan(data):
     while True:
-        account_loan = input("Enter account number to display details: ")
+        account_loan = input("Enter your account number: ")
         account_loan_det = None
         for account in data:
             if account["account_number"] == account_loan:
@@ -232,15 +232,55 @@ def compute_loan(data):
         if loan_num.isdigit():
             loan_num=int(loan_num)
             break
-    print("Your annual loan percentage is:", loan_num*account_loan_det["loan_percentage"]/100)
-    yesno=input("Would you like to take the loan? (yes/no)")
+    print("Your annual loan percentage is:", round(loan_num*account_loan_det["loan_percentage"]/100,2))
+    yesno=input("Would you like to take the loan? (yes/no) ")
     if yesno=="yes":
+        while True:
+            print("how many years would you like to spread your loan across? (min: 1 year) ")
+            duration=input("")
+            if duration.isdigit():
+                duration=int(duration)
+                break
+        generate_loan_file(loan_num,duration, account_loan_det["loan_percentage"])
         account_loan_det["balance"]+=loan_num
         account_loan_det["transactions"].append("+"+ str(loan_num))
         account_loan_det["deposits"].append(loan_num)
         append_to_transactions_file(account_loan, loan_num)
+        
     elif yesno=="no":
         print("Loan has been cancelled.")    
+        
+    
+def generate_payment_plan(loan_num,loan_percentage,duration,monthly_payment):
+    start_date = datetime.date.today().replace(day=1)
+    loan_schedule = []
+    percentage_total=loan_num*loan_percentage/100
+    #print(monthly_payment)
+    for month in range(duration * 12):
+        if percentage_total>monthly_payment*0.9:
+            percentage_total-=monthly_payment*0.9
+            loan_num -= monthly_payment*0.1
+        elif loan_num>monthly_payment:
+            monthly_payment_sav=monthly_payment-percentage_total
+            percentage_total=0
+            loan_num-=monthly_payment_sav
+            loan_num=round(loan_num,2)
+        else:
+            monthly_payment=loan_num
+            loan_num=0
+        date=start_date + datetime.timedelta(days=30 * month)
+        loan_schedule.append(f"date: {date}, payment: {round(monthly_payment,2)}, 'percentage': {round(percentage_total,2)}, 'loan_left': {round(loan_num,2)}")
+
+    return loan_schedule
+        
+def generate_loan_file(loan_num,duration,loan_percentage):
+    monthly_payment = (loan_num*( 1 + (loan_percentage/100) ))/(12*duration)
+    payment_details=generate_payment_plan(loan_num,loan_percentage,duration,monthly_payment)
+    file_path='payment_details.csv'
+    with open(file_path, mode='w', newline='') as file:
+        for entry in payment_details:
+            file.write(entry + '\n')
+            
         
         
 def menu():
